@@ -2,8 +2,38 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Users, CheckCircle, Clock } from 'lucide-react';
+import FileUpload from '@/components/FileUpload';
+import { FileUploadStatus } from '@/types';
 
 const DashboardOverview: React.FC = () => {
+  const [uploadStatus, setUploadStatus] = React.useState<FileUploadStatus[]>([]);
+
+  const handleFilesSelected = (files: FileList) => {
+    const newFiles: FileUploadStatus[] = Array.from(files).map((file, index) => ({
+      id: `${Date.now()}-${index}`,
+      name: file.name,
+      status: 'uploading' as const,
+      type: 'resume' as const
+    }));
+
+    setUploadStatus(prev => [...prev, ...newFiles]);
+
+    // Simulate upload process
+    newFiles.forEach((file, index) => {
+      setTimeout(() => {
+        setUploadStatus(prev => 
+          prev.map(f => 
+            f.id === file.id 
+              ? { ...f, status: 'completed' as const }
+              : f
+          )
+        );
+      }, 2000 + (index * 500));
+    });
+
+    console.log('Selected files for analysis:', files);
+  };
+
   const stats = [
     {
       title: "Total Resumes",
@@ -40,6 +70,23 @@ const DashboardOverview: React.FC = () => {
       <div>
         <h2 className="text-2xl font-bold mb-2">Dashboard Overview</h2>
         <p className="text-resume-gray">Monitor your recruitment analytics and candidate pipeline</p>
+      </div>
+      
+      {/* Resume Upload Section */}
+      <div className="bg-gradient-to-r from-resume-blue/5 to-resume-success/5 rounded-lg p-6 border border-resume-blue/20">
+        <div className="mb-4">
+          <h3 className="text-xl font-semibold mb-2">AI Resume Analysis</h3>
+          <p className="text-resume-gray">Upload hundreds of resumes to analyze them with AI and find the best candidates</p>
+        </div>
+        <FileUpload
+          onFilesSelected={handleFilesSelected}
+          uploadStatus={uploadStatus}
+          title="Upload Resumes for AI Analysis"
+          description="Drag and drop your resume files here or click to browse. Supports bulk uploads for efficient processing."
+          acceptedFileTypes=".pdf,.docx,.txt"
+          multiple={true}
+          maxFiles={100}
+        />
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
