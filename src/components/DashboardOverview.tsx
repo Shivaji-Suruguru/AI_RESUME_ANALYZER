@@ -1,12 +1,16 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Users, CheckCircle, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { FileText, Users, CheckCircle, Clock, Zap } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 import { FileUploadStatus } from '@/types';
 
 const DashboardOverview: React.FC = () => {
   const [uploadStatus, setUploadStatus] = React.useState<FileUploadStatus[]>([]);
+  const [jobRequirements, setJobRequirements] = React.useState('');
+  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
 
   const handleFilesSelected = (files: FileList) => {
     const newFiles: FileUploadStatus[] = Array.from(files).map((file, index) => ({
@@ -24,7 +28,7 @@ const DashboardOverview: React.FC = () => {
         setUploadStatus(prev => 
           prev.map(f => 
             f.id === file.id 
-              ? { ...f, status: 'completed' as const }
+              ? { ...f, status: 'complete' as const }
               : f
           )
         );
@@ -32,6 +36,28 @@ const DashboardOverview: React.FC = () => {
     });
 
     console.log('Selected files for analysis:', files);
+  };
+
+  const handleStartAnalysis = () => {
+    if (uploadStatus.length === 0) {
+      alert('Please upload resumes first');
+      return;
+    }
+    
+    if (!jobRequirements.trim()) {
+      alert('Please add job requirements');
+      return;
+    }
+
+    setIsAnalyzing(true);
+    console.log('Starting AI analysis with job requirements:', jobRequirements);
+    
+    // Simulate analysis process
+    setTimeout(() => {
+      setIsAnalyzing(false);
+      console.log('Analysis completed');
+      // Here you would typically navigate to results or update the UI
+    }, 5000);
   };
 
   const stats = [
@@ -88,6 +114,43 @@ const DashboardOverview: React.FC = () => {
           maxFiles={100}
         />
       </div>
+
+      {/* Job Requirements Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Job Requirements</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="job-requirements">Describe your ideal candidate and job requirements</Label>
+            <Textarea
+              id="job-requirements"
+              placeholder="Enter job requirements, required skills, experience level, qualifications, and any other criteria you want the AI to consider when analyzing resumes..."
+              value={jobRequirements}
+              onChange={(e) => setJobRequirements(e.target.value)}
+              className="min-h-[120px] mt-2"
+            />
+          </div>
+          <Button 
+            onClick={handleStartAnalysis}
+            disabled={isAnalyzing || uploadStatus.length === 0}
+            className="w-full bg-resume-blue hover:bg-resume-blue/90"
+            size="lg"
+          >
+            {isAnalyzing ? (
+              <>
+                <Zap className="mr-2 h-4 w-4 animate-pulse" />
+                Analyzing Resumes...
+              </>
+            ) : (
+              <>
+                <Zap className="mr-2 h-4 w-4" />
+                Start AI Analysis ({uploadStatus.filter(f => f.status === 'complete').length} resumes)
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
