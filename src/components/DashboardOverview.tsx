@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { FileText, Users, CheckCircle, Clock, Zap } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
+import RealtimeResumeAnalytics from '@/components/RealtimeResumeAnalytics';
 import { FileUploadStatus } from '@/types';
 
 const DashboardOverview: React.FC = () => {
@@ -59,6 +60,8 @@ const DashboardOverview: React.FC = () => {
       // Here you would typically navigate to results or update the UI
     }, 5000);
   };
+
+  const completedUploads = uploadStatus.filter(f => f.status === 'complete').length;
 
   const stats = [
     {
@@ -151,6 +154,17 @@ const DashboardOverview: React.FC = () => {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Real-time Analytics Section */}
+      {(isAnalyzing || completedUploads > 0) && (
+        <div>
+          <h3 className="text-xl font-semibold mb-4">Live Analysis Results</h3>
+          <RealtimeResumeAnalytics 
+            isAnalyzing={isAnalyzing} 
+            uploadedCount={completedUploads}
+          />
+        </div>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
